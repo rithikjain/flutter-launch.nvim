@@ -23,13 +23,13 @@ local function writeToBuffer(data)
   end
 end
 
-local function createFlutterJob()
+local function createFlutterJob(command)
   if infoBufferId == -1 then
     print("you need to attach first.")
     return
   end
 
-  jobId = vim.fn.jobstart("flutter attach", {
+  jobId = vim.fn.jobstart("flutter " .. command, {
     stdout_buffered = false,
     on_stdout = function(_, data)
       if data then
@@ -66,11 +66,11 @@ local function toggleBuffer()
 end
 
 
-local function flutterAttach()
+local function flutterLaunchCommand(command)
   createBuffer()
   vim.api.nvim_set_current_buf(infoBufferId)
 
-  createFlutterJob()
+  createFlutterJob(command)
 end
 
 local function sendCommand(command)
@@ -89,7 +89,7 @@ local function terminateJob()
   end
 end
 
-M.attach = flutterAttach
+M.launchCommand = flutterLaunchCommand
 M.sendCommand = sendCommand
 M.terminateJob = terminateJob
 M.toggleInfoBuffer = toggleBuffer

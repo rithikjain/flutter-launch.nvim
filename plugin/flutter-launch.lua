@@ -1,7 +1,10 @@
 local plugin = require("flutter-launch")
 
 vim.api.nvim_create_user_command("FlutterAttach", function()
-  plugin.attach()
+  plugin.launchCommand("attach")
+end, {})
+vim.api.nvim_create_user_command("FlutterRun", function()
+  plugin.launchCommand("run")
 end, {})
 vim.api.nvim_create_user_command("FlutterHotReload", function()
   plugin.sendCommand("r")
