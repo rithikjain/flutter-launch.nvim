@@ -29,7 +29,7 @@ local function createFlutterJob(command)
     return
   end
 
-  jobId = vim.fn.jobstart("flutter " .. command, {
+  jobId = vim.fn.jobstart("fvm flutter " .. command, {
     stdout_buffered = false,
     on_stdout = function(_, data)
       if data then
