@@ -1,7 +1,15 @@
 local M = {}
 
+local dap = require("dap")
+
 local jobId = -1
 local infoBufferId = -1
+local vmUri = ""
+
+local function extractUrl(text)
+  local url = text:match("(http://%S+)")
+  return url
+end
 
 local function createBuffer()
   infoBufferId = vim.api.nvim_create_buf(false, true)
@@ -34,6 +42,12 @@ local function createFlutterJob(command)
     on_stdout = function(_, data)
       if data then
         writeToBuffer(data)
+
+        local vmUriString = extractUrl(table.concat(data, " "))
+
+        if vmUriString and vmUri == "" then
+          vmUri = vmUriString
+        end
       end
     end,
     on_stderr = function(_, data)
@@ -73,6 +87,23 @@ local function flutterLaunchCommand(command)
   createFlutterJob(command)
 end
 
+local function attachToDebugger()
+  if vmUri ~= "" then
+    dap.run({
+      type = "dart",
+      request = "attach",
+      name = "Attach to dart",
+      dartSdkPath = "~/fvm/default/bin/cache/dart-sdk/bin/dart",
+      flutterSdkPath = "~/fvm/default/bin/flutter",
+      program = "${workspaceFolder}/lib/main.dart",
+      cwd = "${workspaceFolder}",
+      vmServiceUri = tostring(vmUri)
+    })
+  else
+    print("Dart process not running yet.")
+  end
+end
+
 local function sendCommand(command)
   if jobId ~= -1 then
     vim.fn.chansend(jobId, { command, "" })
@@ -84,6 +115,9 @@ end
 local function terminateJob()
   if jobId ~= -1 then
     vim.fn.jobstop(jobId)
+    jobId = -1
+    infoBufferId = -1
+    vmUri = ""
   else
     print("You need to attach first.")
   end
@@ -93,5 +127,6 @@ M.launchCommand = flutterLaunchCommand
 M.sendCommand = sendCommand
 M.terminateJob = terminateJob
 M.toggleInfoBuffer = toggleBuffer
+M.attachToDebugger = attachToDebugger
 
 return M

@@ -18,6 +18,9 @@ end, {})
 vim.api.nvim_create_user_command("FlutterInfoToggle", function()
   plugin.toggleInfoBuffer()
 end, {})
+vim.api.nvim_create_user_command("FlutterAttachToDebugger", function()
+  plugin.attachToDebugger()
+end, {})
 
 vim.api.nvim_create_autocmd("BufWritePost", {
   group = vim.api.nvim_create_augroup("FlutterReloadOnSave", {}),
